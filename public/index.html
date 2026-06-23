@@ -108,6 +108,7 @@
   .vrow .v{font-size:13.5px;font-weight:600;text-align:right;max-width:200px}
   .statusPill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:700}
   .vnotes{margin-top:6px;font-size:13px;line-height:1.55;color:var(--text);white-space:pre-wrap}
+  .photo{width:100%;height:185px;object-fit:cover;border-radius:10px;margin-bottom:16px;display:block;background:var(--bg);border:1px solid var(--line)}
 
   .toast{position:absolute;bottom:18px;left:50%;transform:translateX(-50%) translateY(20px);z-index:900;background:var(--ink);color:#fff;padding:10px 18px;border-radius:30px;font-size:13px;font-weight:600;opacity:0;transition:.25s;pointer-events:none}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
@@ -192,6 +193,7 @@ const STATUSES=[
   {id:'passed',    label:'Passed',        color:'#94A3B8'},
 ];
 const TYPES=['Industrial','Retail','Office','Multifamily','Land','Mixed-use','Other'];
+const STRUCTURE_USES=['Warehouse','Manufacturing','Office','Retail','Showroom','Auto / service','Mixed-use','Residential','Vacant / land','Other'];
 const sColor=id=>(STATUSES.find(s=>s.id===id)||STATUSES[0]).color;
 const sLabel=id=>(STATUSES.find(s=>s.id===id)||STATUSES[0]).label;
 const fmt=n=>n||n===0?Number(n).toLocaleString('en-CA'):'';
@@ -307,15 +309,18 @@ function openView(p){
   $('dTitle').textContent=p.name||'Property';
   const row=(k,v)=>v?`<div class="vrow"><span class="k">${k}</span><span class="v">${v}</span></div>`:'';
   $('dBody').innerHTML=`
+    ${p.image?`<img class="photo" src="${esc(p.image)}" alt="" onerror="this.style.display='none'"/>`:''}
     <div class="vrow"><span class="k">Status</span><span class="v">
       <span class="statusPill" style="background:${sColor(p.status)}22;color:${sColor(p.status)}">
       <span style="width:8px;height:8px;border-radius:50%;background:${sColor(p.status)}"></span>${sLabel(p.status)}</span></span></div>
     ${row('Address',esc(p.address))}
     ${row('Asset type',esc(p.type))}
+    ${row('Structure use',esc(p.structureUse))}
     ${row('Building SF',p.buildingSf?`<span class="num">${fmt(p.buildingSf)} SF</span>`:'')}
     ${row('Lot size',p.lotSize?`<span class="num">${fmt(p.lotSize)} ${p.lotUnit||'sqft'}</span>`:'')}
     ${row('Zoning',esc(p.zoning))}
     ${row('Est. value',p.value?`<span class="num">$${fmt(p.value)}</span>`:'')}
+    ${row('Owner name',esc(p.ownerName))}
     ${row('Owner / contact',esc(p.owner))}
     ${p.notes?`<div style="padding-top:12px"><span class="k" style="font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);font-weight:700">Notes</span><div class="vnotes">${esc(p.notes)}</div></div>`:''}`;
   $('dFoot').innerHTML=`<button class="btn primary" id="editBtn">Edit</button>
@@ -324,6 +329,11 @@ function openView(p){
   $('editBtn').onclick=()=>openEdit(p.id);
   $('delBtn').onclick=()=>del(p.id);
   $('detail').classList.add('open');
+}
+function structOpts(cur){
+  const all=[...new Set([cur, ...STRUCTURE_USES].filter(Boolean))];
+  return `<option value="" ${!cur?'selected':''}>—</option>`+
+    all.map(o=>`<option value="${esc(o)}" ${o===cur?'selected':''}>${esc(o)}</option>`).join('');
 }
 function openEdit(id){
   editingId=id;
@@ -336,6 +346,7 @@ function openEdit(id){
     <div class="grid2">
       <div class="field"><label>Asset type</label><select id="f_type">${opt(TYPES,p.type)}</select></div>
       <div class="field"><label>Status</label><select id="f_status">${opt(STATUSES,p.status,s=>s.id,s=>s.label)}</select></div></div>
+    <div class="field"><label>Structure use</label><select id="f_struct">${structOpts(p.structureUse)}</select></div>
     <div class="grid2">
       <div class="field"><label>Building SF</label><input id="f_bsf" type="number" value="${p.buildingSf||''}" placeholder="0"/></div>
       <div class="field"><label>Lot size</label><input id="f_lot" type="number" value="${p.lotSize||''}" placeholder="0"/></div></div>
@@ -343,8 +354,11 @@ function openEdit(id){
       <div class="field"><label>Lot unit</label><select id="f_unit">${opt(['sqft','acres'],p.lotUnit||'sqft')}</select></div>
       <div class="field"><label>Est. value (CAD)</label><input id="f_val" type="number" value="${p.value||''}" placeholder="0"/></div></div>
     <div class="field"><label>Zoning</label><input id="f_zone" value="${esc(p.zoning||'')}" placeholder="e.g. IP(2), RA1"/></div>
-    <div class="field"><label>Owner / contact</label><input id="f_owner" value="${esc(p.owner||'')}" placeholder="Name / phone / email"/></div>
-    <div class="field"><label>Notes</label><textarea id="f_notes" placeholder="Outreach status, deal context…">${esc(p.notes||'')}</textarea></div>`;
+    <div class="field"><label>Owner name</label><input id="f_ownerName" value="${esc(p.ownerName||'')}" placeholder="e.g. 12345 BC Ltd."/></div>
+    <div class="field"><label>Owner / contact</label><input id="f_owner" value="${esc(p.owner||'')}" placeholder="Phone / email"/></div>
+    <div class="field"><label>Notes</label><textarea id="f_notes" placeholder="Outreach status, deal context…">${esc(p.notes||'')}</textarea></div>
+    ${p.image?`<img class="photo" src="${esc(p.image)}" alt="" style="height:120px" onerror="this.style.display='none'"/>`:''}
+    <p style="font-size:11.5px;color:var(--muted);margin:0">Add or change the photo in the Airtable “Photo” field — it appears here automatically.</p>`;
   $('dFoot').innerHTML=`<button class="btn" id="cancelBtn">Cancel</button><button class="btn primary" id="saveBtn">Save</button>`;
   $('cancelBtn').onclick=()=>{editingId=null;openView(DATA.find(d=>d.id===id)||p);};
   $('saveBtn').onclick=()=>commit(id);
@@ -353,6 +367,7 @@ function openEdit(id){
 async function commit(id){
   const g=k=>$(k).value.trim();
   const obj={name:g('f_name'),address:g('f_addr'),type:g('f_type'),status:g('f_status'),
+    structureUse:$('f_struct').value,ownerName:g('f_ownerName'),
     buildingSf:g('f_bsf'),lotSize:g('f_lot'),lotUnit:g('f_unit'),value:g('f_val'),
     zoning:g('f_zone'),owner:g('f_owner'),notes:g('f_notes')};
   $('saveBtn').disabled=true;$('saveBtn').textContent='Saving…';
