@@ -1,7 +1,0 @@
-# Netlify configuration for IPG Property Tracker
-# publish: the folder served to browsers (only index.html lives here)
-# functions: the private serverless code (kept OUT of the public folder)
-
-[build]
-  publish = "public"
-  functions = "netlify/functions"
