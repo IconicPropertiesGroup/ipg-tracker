@@ -18,7 +18,7 @@
   body{font-family:'Inter',system-ui,sans-serif;color:var(--text);background:var(--bg);overflow:hidden;-webkit-font-smoothing:antialiased}
   #app{display:grid;grid-template-columns:340px 1fr;height:100vh}
 
-  .side{background:var(--navy);color:#fff;display:flex;flex-direction:column;min-width:0}
+  .side{background:var(--navy);color:#fff;display:flex;flex-direction:column;min-width:0;min-height:0;height:100vh}
   .brand{padding:18px 20px 14px;border-bottom:1px solid rgba(255,255,255,.08)}
   .wordmark{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.5px;font-size:16px}
   .logo{width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,var(--blue),var(--blue-lite));display:grid;place-items:center;font-size:12px;font-weight:800}
@@ -50,7 +50,7 @@
   .refresh:hover{color:#fff}
   .refresh.spin svg{animation:spin .7s linear infinite}
   @keyframes spin{to{transform:rotate(360deg)}}
-  .list{flex:1;overflow-y:auto;padding:4px 12px 18px}
+  .list{flex:1;min-height:0;overflow-y:auto;padding:4px 12px 18px}
   .list::-webkit-scrollbar{width:8px}
   .list::-webkit-scrollbar-thumb{background:rgba(255,255,255,.14);border-radius:8px}
   .card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.07);border-radius:11px;padding:11px 12px;margin:6px 0;cursor:pointer;transition:.15s}
@@ -85,7 +85,7 @@
   .dhead h2{margin:0;font-size:14px;font-weight:700}
   .iconbtn{width:30px;height:30px;border-radius:8px;border:1px solid var(--line);background:#fff;cursor:pointer;display:grid;place-items:center;color:var(--muted);transition:.15s}
   .iconbtn:hover{background:var(--bg);color:var(--text)}
-  .dbody{flex:1;overflow-y:auto;padding:18px}
+  .dbody{flex:1;min-height:0;overflow-y:auto;padding:18px}
   .field{margin-bottom:14px}
   .field label{display:block;font-size:10.5px;text-transform:uppercase;letter-spacing:.8px;font-weight:700;color:var(--muted);margin-bottom:5px}
   .field input,.field select,.field textarea{width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:9px;font-size:13.5px;font-family:inherit;color:var(--text);background:#fff}
@@ -133,7 +133,7 @@
     <div class="toolbar">
       <div class="search">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-        <input id="search" placeholder="Search address or name…" />
+        <input id="search" placeholder="Search address or owner…" />
       </div>
       <button class="addbtn" id="addBtn">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>
@@ -259,7 +259,7 @@ function visible(){
     if(filters.status.size&&!filters.status.has(p.status))return false;
     if(filters.type.size&&!filters.type.has(p.type))return false;
     if(filters.q){const q=filters.q.toLowerCase();
-      if(!(`${p.name} ${p.address} ${p.zoning}`.toLowerCase().includes(q)))return false;}
+      if(!(`${p.address} ${p.ownerName} ${p.name}`.toLowerCase().includes(q)))return false;}
     return true;
   });
 }
