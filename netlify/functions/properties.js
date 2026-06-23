@@ -37,6 +37,10 @@ function toApp(rec){
     value: f['Est Value'] ?? '',
     zoning: f['Zoning'] || '',
     owner: f['Owner Contact'] || '',
+    ownerName: f['Owner Name'] || '',
+    structureUse: f['Structure Use'] || '',
+    image: (Array.isArray(f['Photo']) && f['Photo'][0])
+      ? (f['Photo'][0].thumbnails?.large?.url || f['Photo'][0].url) : '',
     notes: f['Notes'] || ''
   };
 }
@@ -57,7 +61,10 @@ function toFields(p){
   if (p.value !== undefined) f['Est Value'] = numOrNull(p.value);
   set('Zoning', p.zoning);
   set('Owner Contact', p.owner);
+  set('Owner Name', p.ownerName);
+  if (p.structureUse !== undefined) f['Structure Use'] = p.structureUse === '' ? null : p.structureUse;
   set('Notes', p.notes);
+  // Note: 'Photo' is intentionally not written — attachments are managed in Airtable.
   return f;
 }
 
